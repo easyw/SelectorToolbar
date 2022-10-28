@@ -120,22 +120,25 @@ def selectorMenu():
     partially = partially.split(",")
     unchecked = unchecked.split(",")
     position = position.split(",")
-    active = Gui.activeWorkbench().__class__.__name__
-    l = []
-    for i in partially:
-        if i in actions:
-            l.append(i)
-    s = list(actions)
-    s.sort()
-    for i in s:
-        if i not in l and i not in enabled and i not in unchecked:
-            l.append(i)
-    for i in l:
-        sMenu.addAction(actions[i])
-        sMenuStatic.addAction(actions[i])
-    aMenu.setText(actions[active].text())
-    aMenu.setIcon(actions[active].icon())
-
+    try: #compatibility w/ A3 Link Branch
+        active = Gui.activeWorkbench().__class__.__name__
+        l = []
+        for i in partially:
+            if i in actions:
+                l.append(i)
+        s = list(actions)
+        s.sort()
+        for i in s:
+            if i not in l and i not in enabled and i not in unchecked:
+                l.append(i)
+        for i in l:
+            sMenu.addAction(actions[i])
+            sMenuStatic.addAction(actions[i])
+        aMenu.setText(actions[active].text())
+        aMenu.setIcon(actions[active].icon())
+    except:
+        pass
+    
 
 def onWorkbenchActivated():
     """Populate the selector toolbar."""
@@ -146,48 +149,51 @@ def onWorkbenchActivated():
     menu = p.GetString("Menu", "Front")
     enabled = p.GetString("Enabled", dList)
     enabled = enabled.split(",")
-    active = Gui.activeWorkbench().__class__.__name__
-    if active not in enabled:
-        enabled.append(active)
-    if menu == "Front" and not static:
-        enabled.remove(active)
-    elif menu == "End" and not static:
-        enabled.remove(active)
-    else:
+    try:  #compatibility w/ A3 Link Branch
+        active = Gui.activeWorkbench().__class__.__name__
+        if active not in enabled:
+            enabled.append(active)
+        if menu == "Front" and not static:
+            enabled.remove(active)
+        elif menu == "End" and not static:
+            enabled.remove(active)
+        else:
+            pass
+        if menu == "Front":
+            if static:
+                tb.addAction(aMenuStatic)
+                w = tb.widgetForAction(aMenuStatic)
+                w.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+            else:
+                tb.addAction(aMenu)
+                w = tb.widgetForAction(aMenu)
+            w.setPopupMode(QtGui.QToolButton
+                        .ToolButtonPopupMode
+                        .InstantPopup)
+        group.blockSignals(True)
+        for i in enabled:
+            for key in actions:
+                if i == actions[key].data():
+                    a = actions[key]
+                    a.setChecked(False)
+                    tb.addAction(a)
+                    if active == a.data():
+                        a.setChecked(True)
+        group.blockSignals(False)
+        if menu == "End":
+            if static:
+                tb.addAction(aMenuStatic)
+                w = tb.widgetForAction(aMenuStatic)
+                w.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+            else:
+                tb.addAction(aMenu)
+                w = tb.widgetForAction(aMenu)
+            w.setPopupMode(QtGui.QToolButton
+                        .ToolButtonPopupMode
+                        .InstantPopup)
+    except:
         pass
-    if menu == "Front":
-        if static:
-            tb.addAction(aMenuStatic)
-            w = tb.widgetForAction(aMenuStatic)
-            w.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        else:
-            tb.addAction(aMenu)
-            w = tb.widgetForAction(aMenu)
-        w.setPopupMode(QtGui.QToolButton
-                       .ToolButtonPopupMode
-                       .InstantPopup)
-    group.blockSignals(True)
-    for i in enabled:
-        for key in actions:
-            if i == actions[key].data():
-                a = actions[key]
-                a.setChecked(False)
-                tb.addAction(a)
-                if active == a.data():
-                    a.setChecked(True)
-    group.blockSignals(False)
-    if menu == "End":
-        if static:
-            tb.addAction(aMenuStatic)
-            w = tb.widgetForAction(aMenuStatic)
-            w.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
-        else:
-            tb.addAction(aMenu)
-            w = tb.widgetForAction(aMenu)
-        w.setPopupMode(QtGui.QToolButton
-                       .ToolButtonPopupMode
-                       .InstantPopup)
-
+    
 
 def prefDialog():
     """Preferences dialog."""
